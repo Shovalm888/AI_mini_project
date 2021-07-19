@@ -16,8 +16,8 @@ class Agent():
         
 class Cons:
         
-    BOARD_WIDTH = 300
-    BOARD_HEIGHT = 300
+    BOARD_WIDTH = 130
+    BOARD_HEIGHT = 130
     DELAY = 100
     DOT_SIZE = 10
     MAX_RAND_POS = 27
@@ -52,10 +52,17 @@ class Board(Canvas):
 
     def load_images(self):
         """loads images from the disk"""
+    # size = 10, 10
+    # try:
+    #     im = Image.open("yellow.png")
+    #     im.thumbnail(size, Image.ANTIALIAS)
+    #     im.save("yellow.png", "PNG")
+    # except IOError: 
+    #     print("err")
 
         # Change the color to same color for each agent where the head is the darkest color
         # For 4 Agents, head and body, two colors for each:
-        self.images_names = ['black', 'purple', 'brown', 'orange', 'red', 'green', 'yellow', 'blue', 'white']
+        self.images_names = ['red', 'purple','red', 'brown', 'orange', 'red','black', 'green', 'yellow', 'blue', 'white']
  
         self.images = []
 
@@ -117,13 +124,13 @@ class Board(Canvas):
  
         directions = [[10, 0], [-10, 0], [0, 10], [0, -10]]
 
-        if pos[i - 1][0] == (Cons.BOARD_WIDTH - 1):
+        if pos[i - 1][0] == (Cons.BOARD_WIDTH - Cons.DOT_SIZE):
             directions.remove([10, 0])
 
         elif pos[i - 1][0] == 0:
             directions.remove([-10, 0])
 
-        if pos[i - 1][1] == (Cons.BOARD_HEIGHT - 1):
+        if pos[i - 1][1] == (Cons.BOARD_HEIGHT - Cons.DOT_SIZE):
             directions.remove([0, 10])
 
         elif pos[i - 1][1] == 0:
@@ -157,20 +164,29 @@ class Board(Canvas):
         dots = [self.find_withtag(f"{agent.id}-dot") for agent in self.agents]
         heads = [self.find_withtag(f"{agent.id}-head") for agent in self.agents]
         items = [dot + head for dot, head in zip(dots, heads)]
+
         
         for item, head in zip(items, heads): 
 
+            z = 0
+
+            while z < len(item)-1:
+
+                c1 = self.coords(item[z])
+                c2 = self.coords(item[z+1])
+                self.move(item[z], c2[0]-c1[0], c2[1]-c1[1])
+                z += 1
+
             x1, y1, x2, y2 = self.bbox(head)
-
             directions = [[10, 0], [-10, 0], [0, 10], [0, -10]]
-
-            if x1 == (Cons.BOARD_WIDTH - 1):
+            
+            if x2 == (Cons.BOARD_WIDTH):
                 directions.remove([10, 0])
 
             elif x1 == 0:
                 directions.remove([-10, 0])
 
-            if y1 == (Cons.BOARD_HEIGHT - 1):
+            if y2 == (Cons.BOARD_HEIGHT):
                 directions.remove([0, 10])
 
             elif y1 == 0:
@@ -178,6 +194,7 @@ class Board(Canvas):
 
             rand.shuffle(directions)
 
+            self.moveX = -1
             while len(directions) > 0:
 
                 goto = directions.pop()
@@ -187,29 +204,32 @@ class Board(Canvas):
                 if len(self.gettags(self.find_enclosed(point[0], point[1],
                                                           point[0] + 10, point[1] + 10))) == 0:
                     self.moveX, self.moveY = goto
-
-            z = 0
-            while z < len(item)-1:
-
-                c1 = self.coords(item[z])
-                c2 = self.coords(item[z+1])
-                self.move(item[z], c2[0]-c1[0], c2[1]-c1[1])
-                z += 1
-
-            self.move(head, self.moveX, self.moveY)     
+            
+            if self.moveX == -1:
+                self.inGame = False
+            
+            else:
+                self.move(head, self.moveX, self.moveY)     
 
 
     def on_timer(self):
         """creates a game cycle each timer event"""
 
         # self.draw_score()
+        self.check_collisions()
 
         if self.inGame:
             self.move_snake()
             self.after(Cons.DELAY, self.on_timer)
         else:
-            self.game_over()            
+            self.game_over()  
 
+    def game_over(self):
+           """deletes all objects and draws game over message"""
+
+           self.delete(ALL)
+           self.create_text(self.winfo_width() /2, self.winfo_height()/2,
+                            text="Game Over")
     # def draw_score(self):
     #     """draws score"""
         
@@ -224,13 +244,39 @@ class Board(Canvas):
     #     self.create_text(self.winfo_width() /2, self.winfo_height()/2,
     #                      text="Game Over with score {0}".format(self.score), fill="white")
 
+    def check_collisions(self):
+        """checks for collisions"""
 
+        dots = []
+        heads = []
+
+        for agent in self.agents:
+            dots.append(self.find_withtag(f"{agent.id}-dot"))
+            head = self.find_withtag(f"{agent.id}-head")
+            if head not in heads:
+                heads.append(head)
+            else:
+                self.inGame = False
+                return
+            
+        overlaps = []
+        for head in heads:
+            x1, y1, x2, y2 = self.bbox(head)
+            overlaps.append(self.find_overlapping(x1, y1, x2, y2))
+        
+        for dot in dots:
+            if dot in overlaps:
+                self.inGame = False
+                return
+
+
+            
 class Snake(Frame):
 
     def __init__(self):
         super().__init__()
 
-        agents = [Agent(7, 'A'), Agent(20, 'B')]    
+        agents = [Agent(7, 'A'), Agent(7, 'B')]    
         self.master.title('Snake')
         self.board = Board(agents)
         self.pack()
