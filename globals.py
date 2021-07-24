@@ -1,8 +1,10 @@
 class Globals:
     def __init__(self):
+        self.Tree_Depth = 2
         self.SERIAL_NUM = 0
         self.BOARD_WIDTH = 450
         self.BOARD_HEIGHT = 450
+        self.BOARD_PADDING = 2 # in squers units
         self.DELAY = 500
         self.DOT_SIZE = 30
         self.PADDING = 3
@@ -10,6 +12,8 @@ class Globals:
         self.REGULAR_SQUARE = "#D8D8DC"
         self.BOARD = None
         self.updated_agent={}
+        self.ForbiddenBiteReward = -100
+        self.ForbiddenDirectionReward = -200
     
         self.Purple = {'head' : "#D22EC2",
                   'body' : "#801B77"}
@@ -19,8 +23,14 @@ class Globals:
                 'body' : "#340177"}
         self.Brown = {'head' : "#FB8F78",
                  'body' : "#985545"}
-    def set_board(self, var):
 
+
+    def set_board(self, var):
+        """ 
+        devide the board to squars, leave 1 square padding in each side and save\n
+        each square under specific tag, e.g. : 3-2 , when 3 represents the column\n
+        and 2 the row (like [x, y])
+         """
         self.BOARD = var
 
         for row in range( self.DOT_SIZE,  self.BOARD_HEIGHT -  self.DOT_SIZE,  self.DOT_SIZE):
@@ -33,27 +43,36 @@ class Globals:
 
 gl = Globals()
 
-def possible_points(head_pos, self_body_pos):
+
+def possible_points(head_pos, forbidden_pos = []): # expect to get nested arrays for several agents
+    """
+    ##### input :
+    * head_pos -> head point, e.g. [?,?]
+    * forbidden_pos -> list of forbidden points.
+
+    e.g.  [ [?,?]  , [?,?] , [?,?] ]   =||= EMPTY
     
+    ##### output : 
+    * list of points with reward in each one, e.g.  [ [?,?,reward] , [?,?,reward] ]
+    * reward == -100 in case that the point was in forbbiden points
+    * reward == -200 in case of suicide (go into the wall)
+    """
+
     width = int(gl.BOARD_WIDTH / gl.DOT_SIZE) - 2
     height = int(gl.BOARD_HEIGHT / gl.DOT_SIZE) - 2
 
-    directions = []
+    points_with_rew = [
+        [head_pos[0] - 1, head_pos[1], 0],
+        [head_pos[0] + 1, head_pos[1], 0],
+        [head_pos[0], head_pos[1] - 1, 0],
+        [head_pos[0], head_pos[1] + 1, 0]
+    ]
 
-    if head_pos[0] > 0:
-        directions.append([-1, 0])
-    if head_pos[0] < width - 1:
-        directions.append([1, 0])
-    if head_pos[1] > 0:
-        directions.append([0, -1])
-    if head_pos[1] < height - 1:
-        directions.append([0, 1])
+    for point in points_with_rew:
+        if point[0] < 0 or point[0] >= width or point[1] < 0 or point[1] >= height:
+            point[2] += gl.ForbiddenDirectionReward
+        elif point in forbidden_pos:
+            point[2] += gl.ForbiddenBiteReward
 
-    # Agent can not bite himself
-    to_ret = []
-    
-    for tmp in directions:
-        if [tmp[0]+head_pos[0], tmp[1]+head_pos[1]] not in self_body_pos:
-            to_ret.append([tmp[0]+head_pos[0], tmp[1]+head_pos[1]])
-
-    return to_ret
+    return points_with_rew    
+   
