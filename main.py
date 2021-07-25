@@ -4,6 +4,9 @@ from Agent import *
 from agents_game import Agent_Snake
 
 
+# _name => private (method and variable both)
+# __name => replaces with _classname__name to avoid names overlapping
+
 
 def main():
 

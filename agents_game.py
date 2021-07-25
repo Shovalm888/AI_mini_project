@@ -26,7 +26,7 @@ class Agent_Snake(Frame):
         """
 
         self.inGame = True
-        self.create_agents( 1 , 2, 1, 1)
+        self.create_agents( 0 , 1, 7, 7)
         gl.BOARD.after(gl.DELAY, self.on_timer)
     
 

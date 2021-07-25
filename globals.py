@@ -5,7 +5,7 @@ class Globals:
         self.BOARD_WIDTH = 450
         self.BOARD_HEIGHT = 450
         self.BOARD_PADDING = 2 # in squers units
-        self.DELAY = 500
+        self.DELAY = 1000
         self.DOT_SIZE = 30
         self.PADDING = 3
         self.BACKGROUND_COLOR = "#4C1618"
@@ -14,6 +14,7 @@ class Globals:
         self.updated_agent={}
         self.ForbiddenBiteReward = -100
         self.ForbiddenDirectionReward = -200
+        self.FORBBIDEN = -100
     
         self.Purple = {'head' : "#D22EC2",
                   'body' : "#801B77"}
