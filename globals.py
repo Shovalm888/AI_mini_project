@@ -1,79 +1,38 @@
 class Globals:
     def __init__(self):
-        self.Tree_Depth = 2
-        self.SERIAL_NUM = 0
+        self.Tree_Depth = 0       # Determines how many steps ahead A_agents will calculate
+        self.SERIAL_NUM = 0       # Serial number for each agent, each agent increase this number value in its creation
         self.BOARD_WIDTH = 450
         self.BOARD_HEIGHT = 450
-        self.BOARD_PADDING = 2 # in squers units
-        self.DELAY = 1000
+        self.BOARD_PADDING = 1    # Determine the padding for each size (in DOT_SIZE units) 
+        self.DELAY = 500          # Delay between the game rounds
         self.DOT_SIZE = 30
-        self.PADDING = 3
+        self.PADDING = 3          # Padding for each DOT
         self.BACKGROUND_COLOR = "#4C1618"
         self.REGULAR_SQUARE = "#D8D8DC"
-        self.BOARD = None
-        self.updated_agent={}
-        self.ForbiddenBiteReward = -100
-        self.ForbiddenDirectionReward = -200
-        self.FORBBIDEN = -100
+        self.BOARD = None         # Board global 'pointer'
+        self.FORBIDDEN = -100     # The minimum reward the agent can get on forbidden action
+        self.REWARDED = abs(self.FORBIDDEN) # The maximum reward the agent can get if he accomplished his goal
+        self.GAME_ZONE_HEIGHT = int(self.BOARD_HEIGHT / self.DOT_SIZE) - (2 * self.BOARD_PADDING) # maintains the board's playing zone height 
+        self.GAME_ZONE_WIDTH = int(self.BOARD_WIDTH / self.DOT_SIZE) - (2 * self.BOARD_PADDING) # maintains the board's playing zone width 
+        self.BIG_DIS = self.GAME_ZONE_WIDTH + self.GAME_ZONE_HEIGHT # Maximum distance between agents (Manhattan distance)
+
     
         self.Purple = {'head' : "#D22EC2",
-                  'body' : "#801B77"}
-        self.Yellow = {'head' : "#FEFD49",
-                  'body' : "#9B982C"}
-        self.Blue = {'head' : "#5007C5",
-                'body' : "#340177"}
+                  'body' : "#801B77",
+                  'name' : 'Purple'}
         self.Brown = {'head' : "#FB8F78",
-                 'body' : "#985545"}
+                 'body' : "#985545",
+                 'name' : 'Brown'}
+        self.Yellow = {'head' : "#FEFD49",
+                  'body' : "#9B982C",
+                  'name' : 'Yellow'}
+        self.Blue = {'head' : "#5007C5",
+                'body' : "#340177",
+                'name' : 'Blue'}
 
-
-    def set_board(self, var):
-        """ 
-        devide the board to squars, leave 1 square padding in each side and save\n
-        each square under specific tag, e.g. : 3-2 , when 3 represents the column\n
-        and 2 the row (like [x, y])
-         """
-        self.BOARD = var
-
-        for row in range( self.DOT_SIZE,  self.BOARD_HEIGHT -  self.DOT_SIZE,  self.DOT_SIZE):
-            for col in range( self.DOT_SIZE,  self.BOARD_WIDTH -  self.DOT_SIZE,  self.DOT_SIZE):
-                self.BOARD.create_rectangle(col+self.PADDING, row+self.PADDING, col+ self.DOT_SIZE-self.PADDING,
-                    row+self.DOT_SIZE-self.PADDING, fill=self.REGULAR_SQUARE, tag = f"{int(col/ self.DOT_SIZE) - 1 }-{int(row/self.DOT_SIZE) - 1}")
-
-    def get_board(self):
-        return self.BOARD
+        self.A_agents_colors = [self.Purple, self.Brown]
+        self.E_agents_colors = [self.Yellow, self.Blue]
 
 gl = Globals()
 
-
-def possible_points(head_pos, forbidden_pos = []): # expect to get nested arrays for several agents
-    """
-    ##### input :
-    * head_pos -> head point, e.g. [?,?]
-    * forbidden_pos -> list of forbidden points.
-
-    e.g.  [ [?,?]  , [?,?] , [?,?] ]   =||= EMPTY
-    
-    ##### output : 
-    * list of points with reward in each one, e.g.  [ [?,?,reward] , [?,?,reward] ]
-    * reward == -100 in case that the point was in forbbiden points
-    * reward == -200 in case of suicide (go into the wall)
-    """
-
-    width = int(gl.BOARD_WIDTH / gl.DOT_SIZE) - 2
-    height = int(gl.BOARD_HEIGHT / gl.DOT_SIZE) - 2
-
-    points_with_rew = [
-        [head_pos[0] - 1, head_pos[1], 0],
-        [head_pos[0] + 1, head_pos[1], 0],
-        [head_pos[0], head_pos[1] - 1, 0],
-        [head_pos[0], head_pos[1] + 1, 0]
-    ]
-
-    for point in points_with_rew:
-        if point[0] < 0 or point[0] >= width or point[1] < 0 or point[1] >= height:
-            point[2] += gl.ForbiddenDirectionReward
-        elif point in forbidden_pos:
-            point[2] += gl.ForbiddenBiteReward
-
-    return points_with_rew    
-   
