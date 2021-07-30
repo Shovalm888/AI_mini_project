@@ -1,6 +1,6 @@
 class Globals:
     def __init__(self):
-        self.Tree_Depth = 0       # Determines how many steps ahead A_agents will calculate
+        self.Tree_Depth = 2       # Determines how many steps ahead A_agents will calculate
         self.SERIAL_NUM = 0       # Serial number for each agent, each agent increase this number value in its creation
         self.BOARD_WIDTH = 450
         self.BOARD_HEIGHT = 450
@@ -23,7 +23,7 @@ class Globals:
                   'name' : 'Purple'}
         self.Brown = {'head' : "#FB8F78",
                  'body' : "#985545",
-                 'name' : 'Brown'}
+                 'name' : 'Skin_color'}
         self.Yellow = {'head' : "#FEFD49",
                   'body' : "#9B982C",
                   'name' : 'Yellow'}

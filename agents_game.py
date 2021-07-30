@@ -39,12 +39,12 @@ class Agent_Snake(Frame):
             self.E_Agents.append(AgentE(E_len, gl.E_agents_colors[E - 1]))
             E -= 1
 
-        self.A_Agents[0]._set_on_board_by_points([[0,0],[1,0],[2,0]])
-        self.E_Agents[0]._set_on_board_by_points([[6,3],[7,3],[8,3]])
-        # taken_points = []
-        # for agent in self.A_Agents + self.E_Agents:
-        #     agent.set_on_board_randomly( taken_points)
-        #     taken_points += agent.get_pos()
+        # self.A_Agents[0]._set_on_board_by_points([[0,0],[1,0],[2,0]])
+        # self.E_Agents[0]._set_on_board_by_points([[6,3],[7,3],[8,3]])
+        taken_points = []
+        for agent in self.A_Agents + self.E_Agents:
+            agent.set_on_board_randomly( taken_points)
+            taken_points += agent.get_pos()
 
     
     def on_timer(self):

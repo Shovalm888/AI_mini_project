@@ -33,7 +33,8 @@ class AgentE(Agent):
         
         head = self._pos[0]
         avg_dist = []
-        agents_points = []   
+        agents_points = []
+        # calculate avg distance between self head to the other agents   
         for agent in agents:
             sum = 0
             for point in agent.get_round_pos():
@@ -41,6 +42,7 @@ class AgentE(Agent):
             
             avg_dist.append(sum / agent.get_size())
             agents_points += agent.get_round_pos()
+        # Chooses the nearest agent
         for point in agents[avg_dist.index(min(avg_dist))].get_round_pos(): 
             x_dist = head[0] - point[0]
             y_dist = head[1] - point[1]
